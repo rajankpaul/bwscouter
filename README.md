@@ -26,5 +26,5 @@ Please note that to use BWScouter, you will need to have a valid Hypixel API key
 
 Here is an example format for the `config.ini` file:
 
-[hypixel]
-api_key = YOUR_API_KEY_HERE
+    [hypixel]
+    api_key = YOUR_API_KEY_HERE
