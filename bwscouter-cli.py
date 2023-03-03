@@ -42,14 +42,19 @@ def get_player_stats(api_key, player_uuid):
         return None
     else:
         # Extract player's Bedwars stats from JSON data
-        bedwars_stats = data['player']['stats']['Bedwars']
-        bedwars_xp = bedwars_stats['Experience']
-        bedwars_wins = bedwars_stats['wins_bedwars']
-        bedwars_losses = bedwars_stats['losses_bedwars']
-        bedwars_final_kills = bedwars_stats['final_kills_bedwars']
-        bedwars_final_deaths = bedwars_stats['final_deaths_bedwars']
-        bedwars_beds_broken = bedwars_stats['beds_broken_bedwars']
-        bedwars_beds_lost = bedwars_stats['beds_lost_bedwars']
+        bedwars_stats = data['player']['stats'].get('Bedwars')
+        if bedwars_stats is None:
+            # Player has not played Bedwars before
+            print("This player has not played Bedwars before.")
+            return None
+
+        bedwars_xp = bedwars_stats.get('Experience', 0)
+        bedwars_wins = bedwars_stats.get('wins_bedwars', 0)
+        bedwars_losses = bedwars_stats.get('losses_bedwars', 0)
+        bedwars_final_kills = bedwars_stats.get('final_kills_bedwars', 0)
+        bedwars_final_deaths = bedwars_stats.get('final_deaths_bedwars', 0)
+        bedwars_beds_broken = bedwars_stats.get('beds_broken_bedwars', 0)
+        bedwars_beds_lost = bedwars_stats.get('beds_lost_bedwars', 0)
 
         # Calculate win/loss ratio and final kill/death ratio
         w_l_ratio = bedwars_wins / bedwars_losses if bedwars_losses > 0 else bedwars_wins
