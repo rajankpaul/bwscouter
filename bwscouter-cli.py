@@ -2,6 +2,16 @@ import requests
 import json
 import configparser
 import time
+import math
+
+API_REQUEST_LIMIT_PER_MINUTE = 120
+
+def calculate_optimal_sleep_time(num_api_keys):
+    """
+    Calculates the optimal sleep time between API requests based on the number
+    of API keys available and the API request limit per minute.
+    """
+    return (60 / API_REQUEST_LIMIT_PER_MINUTE) / num_api_keys
 
 def calculate_bedwars_stars(bedwars_xp):
     # Initialize variables
@@ -76,6 +86,8 @@ def get_player_stats(api_key, player_uuid):
             'beds_broken': bedwars_beds_broken,
             'beds_lost': bedwars_beds_lost,
         }
+    
+    time.sleep(0.01)  # Sleep for 10 milliseconds
 
 def print_player_stats(player_stats):
     # Print the player's Bedwars Stats
@@ -89,10 +101,15 @@ def print_player_stats(player_stats):
     print(f"Final Kill/Death Ratio: {player_stats['fkd_ratio']:.2f}")
     print(f"Beds Broken: {player_stats['beds_broken']}")
           
-# Load API key from config.ini file
+# Load API keys from config.ini file
 config = configparser.ConfigParser()
 config.read('config.ini')
-api_key = config['hypixel']['api_key']
+api_keys = config['hypixel']['api_keys'].split(',')
+
+# Initialize API key index and last API request time
+api_key_index = 0
+last_api_request_time = 0
+api_key = api_keys[api_key_index]
 
 # Hypixel API endpoint for the Bedwars leaderboard
 leaderboard_url = f"https://api.hypixel.net/leaderboards?key={api_key}&type=bedwars"
@@ -101,7 +118,13 @@ leaderboard_url = f"https://api.hypixel.net/leaderboards?key={api_key}&type=bedw
 leaderboard_response = requests.get(leaderboard_url)
 leaderboard_data = json.loads(leaderboard_response.text)
 
+# Calculate the optimal sleep time based on the number of API keys
+optimal_sleep_time = calculate_optimal_sleep_time(len(api_keys))
+
 while True:
+    # Determine which API key to use
+    api_key = api_keys[api_key_index]
+    
     # Ask the user for the player name
     player_name = input("Enter the player name (or '/exit' to quit): ")
     
@@ -174,6 +197,11 @@ while True:
             player_stats = get_player_stats(api_key, player_uuid)
             if player_stats is not None:
                 print_player_stats(player_stats)
-    
-    # Wait for a short time before taking the next input
-    time.sleep(1)
+
+            # Update API key index and last API request time
+            api_key_index = (api_key_index + 1) % len(api_keys)
+            current_time = time.time()
+            time_since_last_request = current_time - last_api_request_time
+            if time_since_last_request < optimal_sleep_time:
+                time.sleep(optimal_sleep_time - time_since_last_request)
+            last_api_request_time = time.time()
