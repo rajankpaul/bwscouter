@@ -27,4 +27,12 @@ Please note that to use BWScouter, you will need to have a valid Hypixel API key
 Here is an example format for the `config.ini` file:
 
     [hypixel]
-    api_key = YOUR_API_KEY_HERE
+    api_keys = YOUR_API_KEY_HERE_1, YOUR_API_KEY_HERE_2, YOUR_API_KEY_HERE_3
+
+## Changes Made
+
+- Implemented a function `calculate_optimal_sleep_time()` to calculate the optimal sleep time between API requests based on the number of API keys available and the API request limit per minute.
+- Updated the main loop to use the optimal sleep time instead of a fixed sleep time of 1 second.
+- Implemented a check to ensure that the total number of API requests per minute does not exceed the Hypixel API server's request limit of 120 queries per minute.
+- Added error handling to catch and display errors that may occur during API requests.
+- Updated the README to include information about the changes made to the code, and added an example format for the `config.ini` file.
